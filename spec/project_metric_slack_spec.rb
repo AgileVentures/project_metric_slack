@@ -39,6 +39,7 @@ describe ProjectMetricSlack, :vcr do
   end
 
   context '#image' do
+    let(:svg_many) { File.read './spec/data/many.svg' }
     it 'provides expected image using cached raw_data' do
       metric = ProjectMetricSlack.new({channel: 'projectscope', token: ENV["SLACK_API_TOKEN"]}, raw_data)
       expect(metric.image).to eq svg
@@ -57,6 +58,16 @@ describe ProjectMetricSlack, :vcr do
     it 'deals gracefully with max = min' do
       metric = ProjectMetricSlack.new({channel: 'projectscope', token: ENV["SLACK_API_TOKEN"]}, {'armandofox' => 5, 'mtc2013' => 5})
       expect(metric.image).to eq svg_equality
+    end
+
+    it 'tries to make the graph at least twice as wide as tall if there are more than 9' do
+      metric = ProjectMetricSlack.new({channel: 'projectscope', token: ENV["SLACK_API_TOKEN"]},
+                                      {'armandofox' => 5, 'mtc2013' => 5, 'marian' => 5, 'marianscat' => 3,
+                                       'randompenguin' => 1, 'ghost' => 4, 'othercat' => 2, 'pikachu' => 1,
+                                       'blastoise' => 5, 'hitmonchan' => 4, 'magmar' => 3, 'meowth' => 2,
+                                       'pidgy' => 2, 'scyther' => 3, 'abra' => 4, 'wartortle' => 1,
+                                       'raticate' => 4, 'hypno' => 5, 'eevee' => 3, 'vaporeon' => 5})
+      expect(metric.image).to eq svg_many
     end
   end
 

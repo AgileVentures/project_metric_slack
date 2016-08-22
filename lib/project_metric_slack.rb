@@ -1,5 +1,6 @@
 require 'slack'
 require 'color_functions'
+
 class ProjectMetricSlack
 
   attr_reader :raw_data
@@ -22,7 +23,10 @@ class ProjectMetricSlack
     normalized_member_scores = normalize_member_scores(@raw_data)
     @member_colors = compute_member_hex_colors_for_heatmap(normalized_member_scores)
     file_path = File.join(File.dirname(__FILE__), 'svg.erb')
+    @image_width = 3
+    @image_width = Math.sqrt(@member_colors.length * 0.5).ceil*2 if @member_colors.length > 9
     @image = ERB.new(File.read(file_path), nil, '-').result(self.send(:binding))
+    #File.open(File.join(File.dirname(__FILE__), 'many.svg'), 'w') { |f| f.write @image}
   end
 
   def refresh
