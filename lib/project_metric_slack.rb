@@ -55,19 +55,23 @@ class ProjectMetricSlack
   end
 
   def get_slack_message_totals
-    start_time = (Time.now - (7+Time.now.wday+1).days).to_s[0, 10]
-    end_time = (Time.now - (Time.now.wday).days).to_s[0, 10]
-    date_range = "after:#{start_time} before:#{end_time}"
-    get_member_names_for_channel.inject({}) do |slack_message_totals, user_name|
-      messages = @client.search_all(query: "from:#{user_name} in:#{@channel} #{date_range}").messages
-      slack_message_totals.merge user_name => messages.total
+    start_date = (Time.now - (7+Time.now.wday+1).days).to_date
+    end_date = (Time.now - (Time.now.wday).days).to_date
+    member_names_by_id = get_member_names_by_id
+    id = @client.channels_list['channels'].detect { |c| c['name'] == @channel }.id
+    history = @client.channels_history(channel: id)
+    history.messages.inject(Hash.new(0)) do |slack_message_totals, message|
+      add_to_total = 0
+      add_to_total = 1 if start_date < Time.at(message.ts.to_i).to_date && Time.at(message.ts.to_i).to_date < end_date
+      slack_message_totals.merge member_names_by_id[message.user] => slack_message_totals[message.user] + add_to_total
     end
   end
 
-  def get_member_names_for_channel
-    channels = @client.channels_list['channels']
-    members = channels.detect { |c| c['name'] == @channel }.members
-    @client.users_list.members.select { |u| members.include? u.id }.map &:name
+  def get_member_names_by_id
+    members = @client.users_list.members
+    members.inject({}) do |collection, member|
+      collection.merge member.id => member.name
+    end
   end
 
   def normalize_member_scores member_scores

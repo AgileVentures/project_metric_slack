@@ -3,12 +3,7 @@ require 'project_metric_slack'
 describe ProjectMetricSlack, :vcr do
 
   let(:svg) { File.read './spec/data/sample.svg' }
-  let(:raw_data) { {'an_ju' => 0,
-                    'armandofox' => 0,
-                    'francis' => 0,
-                    'intfrr' => 0,
-                    'mtc2013' => 300,
-                    'tansaku' => 174} }
+  let(:raw_data) { {"tansaku"=>0, "marouen"=>1, "ksteph"=>1, "mtc2013"=>0, "an_ju"=>1, "armandofox"=>1, "marianmosley"=>0}}
   let(:raw_data_two) { {'armandofox' => 0, 'francis' => 0, 'mtc2013' => 0, 'tansaku' => 10} }
   let(:svg_two) { File.read './spec/data/sample_two.svg' }
   let(:svg_equality) { File.read './spec/data/sample_equality.svg' }
