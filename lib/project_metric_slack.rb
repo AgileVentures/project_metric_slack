@@ -26,7 +26,7 @@ class ProjectMetricSlack
     @image_width = 3
     @image_width = Math.sqrt(@member_colors.length * 0.5).ceil*2 if @member_colors.length > 9
     @image = ERB.new(File.read(file_path), nil, '-').result(self.send(:binding))
-    #File.open(File.join(File.dirname(__FILE__), 'many.svg'), 'w') { |f| f.write @image}
+    # File.open(File.join(File.dirname(__FILE__), 'many.svg'), 'w') { |f| f.write @image}
   end
 
   def refresh
