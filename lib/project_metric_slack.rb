@@ -1,6 +1,6 @@
 require 'slack'
 require 'color_functions'
-require 'byebug'
+
 class ProjectMetricSlack
 
   attr_reader :raw_data

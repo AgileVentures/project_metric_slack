@@ -1,20 +1,20 @@
-<% @image_rows = (@member_colors.length/@image_width.to_f).ceil %>
-<svg width="<%= 20*@image_width %>" height="<%= 20*@image_rows %>">
-  <% @members_already_drawn = 0 %>
-  <% @member_colors.each do |name, color| %>
-    <% @y_pos = (@members_already_drawn/@image_width)*20 %>
-    <% @x_pos = (@members_already_drawn % @image_width)*20 %>
-  <rect x="<%= @x_pos %>" y="<%= @y_pos %>" width="20" height="20" style="fill:<%= color %>;stroke:black">
-    <title><%= name %></title>
+<%- @image_rows = (@member_colors.length/@image_width.to_f).ceil -%>
+<svg width="<%=20*@image_width -%>" height="<%= 20*@image_rows -%>">
+  <%- @members_already_drawn = 0 -%>
+  <%- @member_colors.each do |name, color| -%>
+    <%- @y_pos = (@members_already_drawn/@image_width)*20 -%>
+    <%- @x_pos = (@members_already_drawn % @image_width)*20 -%>
+  <rect x="<%= @x_pos -%>" y="<%= @y_pos -%>" width="20" height="20" style="fill:<%= color -%>;stroke:black">
+    <title><%= name -%></title>
   </rect>
-    <% @members_already_drawn+=1 %>
-  <% end %>
-  <% @blank_spaces_left = (@image_rows * @image_width) - @members_already_drawn %>
-  <% @blank_spaces_left.times do |i| %>
-    <% @y_pos = ((@members_already_drawn+i)/@image_width)*20 %>
-    <% @x_pos = ((@members_already_drawn+i) % @image_width)*20 %>
-  <rect x="<%= @x_pos %>" y="<%= @y_pos %>" width="20" height="20" style="fill:#ffffff;stroke:black">
+    <%- @members_already_drawn+=1 -%>
+  <%- end -%>
+  <%- @blank_spaces_left = (@image_rows * @image_width) - @members_already_drawn -%>
+  <%- @blank_spaces_left.times do |i| -%>
+    <%- @y_pos = ((@members_already_drawn+i)/@image_width)*20 -%>
+    <%- @x_pos = ((@members_already_drawn+i) % @image_width)*20 -%>
+  <rect x="<%= @x_pos -%>" y="<%= @y_pos -%>" width="20" height="20" style="fill:#ffffff;stroke:black">
     <title>filler for symmetry (does not represent a person)</title>
   </rect>
-  <% end %>
+  <%- end -%>
 </svg>
