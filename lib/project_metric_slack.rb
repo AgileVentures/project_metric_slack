@@ -55,16 +55,20 @@ class ProjectMetricSlack
   end
 
   def get_slack_message_totals
-    start_date = (Time.now - (7+Time.now.wday+1).days).to_date
-    end_date = (Time.now - (Time.now.wday).days).to_date
+    @start_date = (Time.now - (7+Time.now.wday+1).days).to_date
+    @end_date = (Time.now - (Time.now.wday).days).to_date
     member_names_by_id = get_member_names_by_id
     id = @client.channels_list['channels'].detect { |c| c['name'] == @channel }.id
     history = @client.channels_history(channel: id)
     history.messages.inject(Hash.new(0)) do |slack_message_totals, message|
-      add_to_total = 0
-      add_to_total = 1 if start_date < Time.at(message.ts.to_i).to_date && Time.at(message.ts.to_i).to_date < end_date
-      slack_message_totals.merge member_names_by_id[message.user] => slack_message_totals[message.user] + add_to_total
+      inc = in_time_window?(Time.at(message.ts.to_i).to_date) ? 1 : 0
+      current = slack_message_totals[message.user]
+      slack_message_totals.merge member_names_by_id[message.user] => current + inc
     end
+  end
+
+  def in_time_window? date
+    @start_date < date && date < @end_date
   end
 
   def get_member_names_by_id
