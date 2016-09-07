@@ -9,6 +9,7 @@ class ProjectMetricSlack
     @raw_data = raw_data
     @channel = credentials[:channel]
     @client = Slack::Web::Client.new(token: credentials[:token])
+    Time.zone = 'UTC'
   end
 
   def score
@@ -55,14 +56,14 @@ class ProjectMetricSlack
   end
 
   def get_slack_message_totals
-    @start_date = (Time.now - (7+Time.now.wday+1).days).to_date
-    @end_date = (Time.now - (Time.now.wday).days).to_date
+    @start_date = (Time.zone.now - (7+Time.zone.now.wday+1).days).to_date
+    @end_date = (Time.zone.now - (Time.zone.now.wday).days).to_date
     member_names_by_id = get_member_names_by_id
     id = @client.channels_list['channels'].detect { |c| c['name'] == @channel }.id
-    history = @client.channels_history(channel: id)
+    history = @client.channels_history(channel: id, count: 1000)
     history.messages.inject(Hash.new(0)) do |slack_message_totals, message|
-      inc = in_time_window?(Time.at(message.ts.to_i).to_date) ? 1 : 0
-      current = slack_message_totals[message.user]
+      inc = in_time_window?(Time.at(message.ts.to_i).utc.to_date) ? 1 : 0
+      current = slack_message_totals[member_names_by_id[message.user]]
       slack_message_totals.merge member_names_by_id[message.user] => current + inc
     end
   end
