@@ -9,6 +9,7 @@ class ProjectMetricSlack
     @raw_data = raw_data
     @channel = credentials[:channel]
     @client = Slack::Web::Client.new(token: credentials[:token])
+    Time.zone = 'UTC'
   end
 
   def score
@@ -26,7 +27,7 @@ class ProjectMetricSlack
     @image_width = 3
     @image_width = Math.sqrt(@member_colors.length * 0.5).ceil*2 if @member_colors.length > 9
     @image = ERB.new(File.read(file_path), nil, '-').result(self.send(:binding))
-    #File.open(File.join(File.dirname(__FILE__), 'many.svg'), 'w') { |f| f.write @image}
+    # File.open(File.join(File.dirname(__FILE__), 'many.svg'), 'w') { |f| f.write @image}
   end
 
   def refresh
@@ -55,19 +56,27 @@ class ProjectMetricSlack
   end
 
   def get_slack_message_totals
-    start_time = (Time.now - (7+Time.now.wday+1).days).to_s[0, 10]
-    end_time = (Time.now - (Time.now.wday).days).to_s[0, 10]
-    date_range = "after:#{start_time} before:#{end_time}"
-    get_member_names_for_channel.inject({}) do |slack_message_totals, user_name|
-      messages = @client.search_all(query: "from:#{user_name} in:#{@channel} #{date_range}").messages
-      slack_message_totals.merge user_name => messages.total
+    @start_date = (Time.zone.now - (7+Time.zone.now.wday+1).days).to_date
+    @end_date = (Time.zone.now - (Time.zone.now.wday).days).to_date
+    member_names_by_id = get_member_names_by_id
+    id = @client.channels_list['channels'].detect { |c| c['name'] == @channel }.id
+    history = @client.channels_history(channel: id, count: 1000)
+    history.messages.inject(Hash.new(0)) do |slack_message_totals, message|
+      inc = in_time_window?(Time.at(message.ts.to_i).utc.to_date) ? 1 : 0
+      current = slack_message_totals[member_names_by_id[message.user]]
+      slack_message_totals.merge member_names_by_id[message.user] => current + inc
     end
   end
 
-  def get_member_names_for_channel
-    channels = @client.channels_list['channels']
-    members = channels.detect { |c| c['name'] == @channel }.members
-    @client.users_list.members.select { |u| members.include? u.id }.map &:name
+  def in_time_window? date
+    @start_date < date && date < @end_date
+  end
+
+  def get_member_names_by_id
+    members = @client.users_list.members
+    members.inject({}) do |collection, member|
+      collection.merge member.id => member.name
+    end
   end
 
   def normalize_member_scores member_scores
