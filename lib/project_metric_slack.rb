@@ -87,4 +87,8 @@ class ProjectMetricSlack
       normalized_member_scores.merge name => (num_messages - min)/diff
     end
   end
+
+  def self.credentials
+    ['token','channel']
+  end
 end
