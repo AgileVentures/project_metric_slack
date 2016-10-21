@@ -40,6 +40,10 @@ class ProjectMetricSlack
     @score = @image = nil
   end
 
+  def self.credentials
+    ['token','channel']
+  end
+
   private
 
   def gini_coefficient(array)
@@ -86,9 +90,5 @@ class ProjectMetricSlack
     member_scores.inject({}) do |normalized_member_scores, (name, num_messages)|
       normalized_member_scores.merge name => (num_messages - min)/diff
     end
-  end
-
-  def self.credentials
-    ['token','channel']
   end
 end
