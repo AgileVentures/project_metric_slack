@@ -10,6 +10,12 @@ describe ProjectMetricSlack, :vcr do
 
   before { Time.stub_chain(:zone, :now) { Time.new(2016, 9, 7, 1, 12, 39, 0) } }
 
+  describe '::credentials' do
+    it 'contains exactly token and channel' do
+      expect(described_class.credentials).to contain_exactly('token','channel')
+    end
+  end
+
   context '#raw_data' do
     it 'fetches raw data' do
       metric = ProjectMetricSlack.new(channel: 'projectscope', token: ENV["SLACK_API_TOKEN"])
