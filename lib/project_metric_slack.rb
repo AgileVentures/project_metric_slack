@@ -40,6 +40,10 @@ class ProjectMetricSlack
     @score = @image = nil
   end
 
+  def self.credentials
+    [:token,:channel]
+  end
+
   private
 
   def gini_coefficient(array)
